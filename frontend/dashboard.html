@@ -2,701 +2,702 @@
 <html lang="en">
 <head>
 <meta charset="utf-8" />
-<title>Mechanisms Dashboard — Final</title>
+<title>Mechanisms Dashboard — Final (QoC + Fixes)</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<!-- Google Fonts -->
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+
+<!-- jQuery (must load before Select2) -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+<!-- Select2 CSS & JS -->
+<link href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/css/select2.min.css" rel="stylesheet"/>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/js/select2.min.js"></script>
 
 <!-- ECharts -->
 <script src="https://cdn.jsdelivr.net/npm/echarts@5/dist/echarts.min.js"></script>
 
-<!-- Tom Select (searchable multi-select) -->
-<link href="https://cdn.jsdelivr.net/npm/tom-select/dist/css/tom-select.default.min.css" rel="stylesheet">
-<script src="https://cdn.jsdelivr.net/npm/tom-select/dist/js/tom-select.complete.min.js"></script>
-
 <style>
 :root{
   --primary:#1976d2;
-  --card-radius:12px;
   --bg:#f5f7fb;
-  --surface:#ffffff;
+  --surface:#fff;
   --muted:#6b7280;
+  --card-radius:12px;
 }
-
-/* Base */
 html,body{height:100%;margin:0;font-family:Inter, "Segoe UI", Roboto, Arial, sans-serif;background:var(--bg);color:#111;}
-
-/* Filter bar (original order) */
-.filter-bar{
-  position:sticky; top:0; z-index:1000000;
-  background:var(--surface); padding:12px 14px; border-bottom:1px solid #e6eef8;
-  display:flex; gap:12px; flex-wrap:wrap; align-items:flex-end; box-shadow:0 4px 18px rgba(25,118,210,0.06);
+.header{background:var(--primary);color:#fff;padding:12px 18px;font-size:20px;font-weight:700;}
+.container{padding:12px 18px 40px;}
+.filter-row{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:12px;align-items:end;}
+.filter { min-width:180px; max-width:300px; }
+.select2-container--default .select2-selection--multiple, .select2-container--default .select2-selection--single {
+  min-height:38px; border-radius:8px; border:1px solid #d0d7e6; padding:4px;
 }
-.filter-box{ display:flex; flex-direction:column; min-width:150px; max-width:360px; flex:0 1 220px; }
-.filter-box label{ font-size:12px; color:var(--muted); margin-bottom:6px; font-weight:700; letter-spacing:0.2px; }
-
-/* TomSelect modern styling tweaks */
-.ts-control { min-height:38px !important; border-radius:10px !important; padding:4px 8px !important; border:1px solid #d6e9fb !important; box-shadow:none !important; }
-.ts-control > .items .item { background: rgba(25,118,210,0.08); color:var(--primary); padding:3px 6px; border-radius:6px; margin-right:4px; }
-.ts-dropdown { font-size:14px; max-height:320px; overflow:auto; border-radius:8px; box-shadow:0 8px 24px rgba(25,118,210,0.12); }
-/* Force dropdown to float above everything to avoid clipping */
-.ts-dropdown { position: fixed !important; z-index: 2147483647 !important; }
-
-/* summary cards */
-.summary-container{ display:flex; gap:16px; margin:16px 18px; flex-wrap:wrap; align-items:stretch; }
-.card{ background:var(--surface); border-radius:var(--card-radius); padding:14px 16px; box-shadow:0 6px 20px rgba(16,24,40,0.04); min-width:220px; flex:1; }
-.card h4{ margin:0; font-size:13px; color:var(--muted); font-weight:700; }
-.card .value{ font-size:26px; font-weight:800; color:var(--primary); margin-top:8px; }
-
-/* tabs */
-.tabs{ display:flex; gap:10px; margin:8px 18px 0 18px; }
-.tab{ padding:8px 12px; border-radius:10px 10px 0 0; background:#f0f6ff; color:var(--primary); font-weight:700; cursor:pointer; }
-.tab.active{ background:var(--primary); color:white; box-shadow:0 8px 20px rgba(25,118,210,0.12); }
-
-/* content */
-.tab-content{ display:none; padding:12px 18px 40px; }
-.tab-content.active{ display:block; }
-.chart-box{ height:420px; background:var(--surface); border-radius:12px; padding:12px; box-shadow:0 8px 24px rgba(16,24,40,0.04); margin:12px 0; overflow:hidden; }
-
-/* grid */
-.grid-2 { display:grid; grid-template-columns: 1fr 360px; gap:12px; align-items:start; }
-.grid-full { display:grid; grid-template-columns: 1fr; gap:12px; }
-.trends-grid { display:grid; grid-template-columns: 1fr 1fr; gap:12px; }
-@media(max-width:1100px){ .grid-2{ grid-template-columns:1fr; } .filter-box{flex:1 1 100%} }
-
-/* small text */
-.small{ font-size:12px; color:var(--muted); margin-top:6px; }
-
-/* ensure axis labels wrap and fit */
-.echarts-label { white-space: normal; overflow-wrap: break-word; }
-
-/* helper to reduce font size on small screens */
-@media (max-width:800px){
-  .chart-box{ height:360px; }
-  .filter-box{ min-width:120px; }
-  .tabs{ gap:6px; }
-}
+.select2-dropdown { z-index:2147483647 !important; }
+.summary { display:flex; gap:12px; margin-bottom:12px; }
+.card { background:var(--surface); border-radius:var(--card-radius); padding:12px; box-shadow:0 6px 18px rgba(16,24,40,0.04); flex:1; }
+.card h4{ margin:0;font-size:12px;color:var(--muted); }
+.card .val{ font-size:22px; font-weight:800; color:var(--primary); margin-top:6px;}
+.tabs{display:flex;gap:8px;margin:8px 0 12px;}
+.tab{padding:8px 12px;border-radius:8px;background:#eef7ff;color:var(--primary);cursor:pointer;font-weight:700;}
+.tab.active{background:var(--primary);color:white;}
+.chart-grid-2{display:grid;grid-template-columns:1fr 420px;gap:12px;}
+.chart-grid-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;}
+.chart-box{background:var(--surface);border-radius:10px;padding:8px;height:420px;box-shadow:0 8px 24px rgba(16,24,40,0.04);overflow:hidden;}
+.chart-box.tall{height:520px;}
+.echart-wrap{width:100%;height:100%;}
+.small{font-size:12px;color:var(--muted);}
+@media(max-width:1100px){ .chart-grid-2{grid-template-columns:1fr;} .chart-grid-3{grid-template-columns:1fr;} .filter{min-width:140px;} }
 </style>
 </head>
 
 <body>
+<div class="header">Mechanisms Dashboard — QoC & Achievement</div>
+<div class="container">
 
-<!-- FILTERS (original order) -->
-<div class="filter-bar">
-  <div class="filter-box"><label for="fundingAgencyFilter">Funding Agency</label><select id="fundingAgencyFilter" multiple></select></div>
-  <div class="filter-box"><label for="partnerFilter">Partner Name</label><select id="partnerFilter" multiple></select></div>
-  <div class="filter-box"><label for="mechanismFilter">Mechanism Name</label><select id="mechanismFilter" multiple></select></div>
-  <div class="filter-box"><label for="indicatorFilter">Indicator</label><select id="indicatorFilter" multiple></select></div>
-  <div class="filter-box"><label for="fyFilter">Fiscal Year</label><select id="fyFilter" multiple></select></div>
-  <div class="filter-box"><label for="ageFilter">Coarse Age</label><select id="ageFilter" multiple></select></div>
-  <div class="filter-box"><label for="sexFilter">Sex</label><select id="sexFilter" multiple></select></div>
-  <div style="align-self:flex-end;"><button id="resetFilters" style="padding:9px 12px;border-radius:8px;background:var(--primary);color:white;border:none;cursor:pointer">Reset</button></div>
-</div>
-
-<!-- SUMMARY -->
-<div class="summary-container">
-  <div class="card"><h4>Unique Partners</h4><div id="partnerCount" class="value">0</div><div class="small">Updates when filters applied</div></div>
-  <div class="card"><h4>Unique Mechanisms</h4><div id="mechCount" class="value">0</div><div class="small">Updates when filters applied</div></div>
-  <div class="card"><h4>Overall Achievement</h4><div id="overallSummaryPct" class="value">0%</div><div class="small">Summary percent (also shown in gauge)</div></div>
-</div>
-
-<!-- TABS -->
-<div class="tabs" style="padding-left:18px;">
-  <div class="tab active" data-tab="achievements">Achievements</div>
-  <div class="tab" data-tab="trends">Trends & Insights</div>
-</div>
-
-<!-- ACHIEVEMENTS -->
-<div id="achievements" class="tab-content active">
-  <!-- Targets vs Achievements next to Gauge -->
-  <div class="grid-2">
-    <div class="chart-box" id="targetChart"></div>
-    <div class="chart-box" id="overallGaugeBox"></div>
+  <!-- Filters (shared across tabs) -->
+  <div class="filter-row">
+    <div class="filter">
+      <label class="small">Fiscal Year</label>
+      <select id="fyFilter" multiple style="width:100%"></select>
+    </div>
+    <div class="filter">
+      <label class="small">Partner</label>
+      <select id="partnerFilter" multiple style="width:100%"></select>
+    </div>
+    <div class="filter">
+      <label class="small">Mechanism</label>
+      <select id="mechanismFilter" multiple style="width:100%"></select>
+    </div>
+    <div class="filter">
+      <label class="small">Indicator</label>
+      <select id="indicatorFilter" multiple style="width:100%"></select>
+    </div>
+    <div class="filter">
+      <label class="small">Numerator/Denominator</label>
+      <select id="numDenFilter" multiple style="width:100%"></select>
+    </div>
+    <div style="margin-left:auto">
+      <button id="resetFilters" style="padding:8px 12px;border-radius:8px;background:var(--primary);color:white;border:none;cursor:pointer">Reset</button>
+    </div>
   </div>
 
-  <div class="grid-full">
-    <div class="chart-box" id="partnerChart"></div>
-    <div class="chart-box" id="mechanismChart"></div>
-    <div class="chart-box" id="quarterlyChart"></div>
+  <!-- Summary -->
+  <div class="summary">
+    <div class="card"><h4>Unique Partners</h4><div id="partnerCount" class="val">0</div></div>
+    <div class="card"><h4>Unique Mechanisms</h4><div id="mechCount" class="val">0</div></div>
+    <div class="card"><h4>Overall Achievement</h4><div id="overallSummaryPct" class="val">0%</div></div>
   </div>
-</div>
 
-<!-- TRENDS -->
-<div id="trends" class="tab-content">
-  <div class="trends-grid">
-    <div class="chart-box" id="topIndicatorsChart"></div>
-    <div class="chart-box" id="bottomIndicatorsChart"></div>
-    <div class="chart-box" id="topPartnersChart"></div>
-    <div class="chart-box" id="topMechanismsChart"></div>
+  <!-- Tabs -->
+  <div class="tabs">
+    <div class="tab active" data-tab="tab-ach">Achievements</div>
+    <div class="tab" data-tab="tab-trend">Trends & Insights</div>
+    <div class="tab" data-tab="tab-qoc">Quality of Care (QoC)</div>
   </div>
-</div>
+
+  <!-- Achievements tab -->
+  <div id="tab-ach" class="tab-content" style="display:block">
+    <div class="chart-grid-2">
+      <div class="chart-box" id="targetChart"><div id="targetChart_wrap" class="echart-wrap"></div></div>
+      <div class="chart-box" id="gaugeBox"><div id="gauge_wrap" class="echart-wrap"></div></div>
+    </div>
+
+    <div style="height:12px"></div>
+
+    <div class="chart-grid-2">
+      <div class="chart-box" id="partnerChart"><div id="partnerChart_wrap" class="echart-wrap"></div></div>
+      <div class="chart-box" id="mechanismChart"><div id="mechanismChart_wrap" class="echart-wrap"></div></div>
+    </div>
+
+    <div style="height:12px"></div>
+
+    <div class="chart-box" id="bottomIndicators"><div id="bottomIndicators_wrap" class="echart-wrap"></div></div>
+  </div>
+
+  <!-- Trends tab -->
+  <div id="tab-trend" class="tab-content" style="display:none">
+    <div class="chart-box tall" id="quarterlyTrend"><div id="quarterlyTrend_wrap" class="echart-wrap"></div></div>
+    <div style="height:12px"></div>
+    <div class="chart-grid-3">
+      <div class="chart-box" id="topIndicators"><div id="topIndicators_wrap" class="echart-wrap"></div></div>
+      <div class="chart-box" id="topPartners"><div id="topPartners_wrap" class="echart-wrap"></div></div>
+      <div class="chart-box" id="topMechanisms"><div id="topMechanisms_wrap" class="echart-wrap"></div></div>
+    </div>
+  </div>
+
+  <!-- QoC tab -->
+  <div id="tab-qoc" class="tab-content" style="display:none">
+    <div class="chart-grid-3">
+      <div class="chart-box"><div id="qocLineRace_wrap" class="echart-wrap"></div></div>
+      <div class="chart-box"><div id="qocBarRace_wrap" class="echart-wrap"></div></div>
+      <div class="chart-box"><div id="qocNumDen_wrap" class="echart-wrap"></div></div>
+    </div>
+    <div style="height:12px"></div>
+    <div class="small">QoC charts use shared filters. Use Numerator/Denominator filter to isolate numerator or denominator metrics.</div>
+  </div>
+
+</div> <!-- container -->
+
+<!-- Scripts: Part 3 comes next -->
+
 
 <script>
-/* Final dashboard script
-   - API_URL points to your backend
-   - Tom Select configured with dropdownParent via 'body' and dropdown fixed z-index
-   - Partner/Mechanism sorted ASCENDING by percent
-   - Quarterly chart grouped by fiscal year with quarters offset and labels sized to fit
+/* Dashboard JS — updated: additive logic, legends, quarterly axes, QoC, num/den filter
+   API endpoint:
 */
-
 const API_URL = "http://127.0.0.1:8000/api/mechanisms";
-const additiveIndicators = ["AGYW_PREV","CXCA_SCRN","CXCA_SCRN_POS","CXCA_TX","HTS_INDEX","HTS_INDEX_KNOWNPOS","HTS_INDEX_NEWNEG","HTS_INDEX_NEWPOS","HTS_RECENT","HTS_SELF","HTS_TST","HTS_TST_NEG","HTS_TST_POS","OVC_HIVSTAT","OVC_HIVSTAT_NEG","OVC_HIVSTAT_POS","OVC_SERV","PMTCT_ART","PMTCT_EID","PMTCT_HEI","PMTCT_HEI_POS","PMTCT_STAT","PMTCT_STAT_POS","POST_RESP","PP_PREV","PrEP_NEW","TB_ART","TB_PREV","TB_STAT","TX_ML_died","TX_ML_IIT_less_three_mo","TX_ML_IIT_more_three_mo","TX_ML_IIT_six_more_mo","TX_ML_IIT_three_five_mo","TX_ML_refused_stopped","TX_ML_transferred_out","TX_NET_NEW","TX_NEW","TX_RET","TX_RTT","VMMC_CIRC"];
-const nonAdditiveIndicators = ["PrEP_CT","PrEP_CURR","TX_CURR","TX_CURR_ARVDisp_less_three_mo","TX_CURR_ARVDisp_six_more_mo","TX_CURR_ARVDisp_three_five_mo","TX_PVLS","TX_TB"];
 
-let apiData = null;
+/* Indicator families — adjust as needed */
+const additiveIndicators = new Set(["AGYW_PREV","CXCA_SCRN","CXCA_SCRN_POS","CXCA_TX","HTS_INDEX","HTS_INDEX_KNOWNPOS","HTS_INDEX_NEWNEG","HTS_INDEX_NEWPOS","HTS_RECENT","HTS_SELF","HTS_TST","HTS_TST_NEG","HTS_TST_POS","OVC_HIVSTAT","OVC_HIVSTAT_NEG","OVC_HIVSTAT_POS","OVC_SERV","PMTCT_ART","PMTCT_EID","PMTCT_HEI","PMTCT_HEI_POS","PMTCT_STAT","PMTCT_STAT_POS","POST_RESP","PP_PREV","PrEP_NEW","TB_ART","TB_PREV","TB_STAT","TX_NEW","TX_RET","VMMC_CIRC"]);
+const nonAdditiveIndicators = new Set(["PrEP_CT","PrEP_CURR","TX_CURR","TX_PVLS","TX_TB"]);
+
+/* Storage */
+let raw = null;
 let charts = {};
-const N = v => (v === null || v === undefined || v === "" ? 0 : Number(v));
+const N = v => (v===null||v===undefined||v===''?0:Number(v));
 
 /* Formatting helpers */
-function formatNumber(n){ return (n===null||n===undefined) ? "0" : Number(n).toLocaleString(); }
-function formatPctRound(p){ return `${Math.round(p)}%`; }
-function formatNumWithPct(val, pct){ return `${formatNumber(val)} (${Math.round(pct)}%)`; }
+function fmtN(n){ return Number(n).toLocaleString(); }
+function fmtPct(p, digits=0){ return `${p==null?0: (Math.round(p* Math.pow(10,digits)) / Math.pow(10,digits))}%`; }
+function labelCountPct(count,pct){ return `${fmtN(count)} (${Math.round(pct)}%)`; }
 
-/* Initialize Tom Selects with dropdown parent appended to body */
-let ts = {};
-function makeTom(selector){
-  return new TomSelect(selector, {
-    plugins: ['remove_button'],
-    maxItems: null,
-    create: false,
-    placeholder: 'All',
-    hideSelected: true,
-    closeAfterSelect: false,
-    dropdownParent: 'body',
-    onDropdownOpen: function() {
-      const dd = document.querySelector('.ts-dropdown');
-      if(dd) dd.style.zIndex = 2147483647;
+/* Init Select2 on filters */
+function initFilters() {
+  const selIds = ['#fyFilter','#partnerFilter','#mechanismFilter','#indicatorFilter','#numDenFilter'];
+  selIds.forEach(id => {
+    if ($(id).length) {
+      $(id).select2({ placeholder:'All', allowClear:true, width: 'resolve' });
     }
   });
+
+  // Reset button
+  $('#resetFilters').on('click', ()=> {
+    selIds.forEach(id=> { $(id).val(null).trigger('change'); });
+    refreshAll();
+  });
+
+  // Tab switch
+  $('.tab').on('click', function(){
+    $('.tab').removeClass('active');
+    $(this).addClass('active');
+    const tab = $(this).data('tab');
+    $('.tab-content').hide();
+    $('#' + tab).show();
+    setTimeout(()=> Object.values(charts).forEach(c=>c&&c.resize()),120);
+  });
+
+  // On filter change refresh
+  $('#fyFilter,#partnerFilter,#mechanismFilter,#indicatorFilter,#numDenFilter').on('change', ()=> refreshAll());
 }
 
-/* Helpers */
-function getSelectedValues(id){
-  const el = document.getElementById(id);
-  if(!el) return [];
-  return Array.from(el.selectedOptions).map(o => o.value);
+/* Heuristic to classify record as Numerator / Denominator / Proportion / Other
+   - If record has field 'Num' or 'Numerator' (case-ins) => Numerator
+   - If record has field 'Denominator' or ends with _D => Denominator
+   - If indicator in proportion list or name contains 'ratio' or 'rate' or 'proportion' or ends with _R => Proportion
+   - Else Other
+*/
+function classifyNumDen(record) {
+  const name = (record.Indicator || '').toString().toUpperCase();
+  // explicit fields
+  if ('Numerator' in record || 'Num' in record) return 'Numerator';
+  if ('Denominator' in record || 'Den' in record) return 'Denominator';
+  if (/_N$/.test(name) || name.includes(' NUM') || name.includes('_NUM')) return 'Numerator';
+  if (/_D$/.test(name) || name.includes(' DEN') || name.includes('_DEN')) return 'Denominator';
+  if (name.includes('RATE') || name.includes('RATIO') || name.includes('PROPORTION') || name.endsWith('_R') || nonAdditiveIndicators.has(name)) return 'Proportion';
+  return 'Other';
 }
 
-/* Populate filters from API */
-function populateFilters(){
-  const recs = apiData.records || [];
-  const unique = (k) => [...new Set(recs.map(r => r[k] ?? ""))].filter(x=>x!=="").sort((a,b)=>((""+a).localeCompare(""+b)));
+/* Load API and preprocess records (compute cum_total per indicator respecting additive rules) */
+async function loadData() {
+  try {
+    const res = await fetch(API_URL);
+    if(!res.ok) throw new Error('HTTP ' + res.status);
+    raw = await res.json();
 
-  const indicators = (apiData.filters && apiData.filters.indicators) || unique("Indicator");
-  const fiscalYears = ((apiData.filters && apiData.filters.fiscalYears) || unique("Fiscal Year")).map(String).sort();
-  const ages = (apiData.filters && apiData.filters.coarseAges) || unique("Coarse Age");
-  const sexes = (apiData.filters && apiData.filters.sexes) || unique("Sex");
-  const partners = (apiData.filters && apiData.filters.partners) || unique("Partner Name");
-  const funding = unique("Funding Agency");
-  const mechanisms = unique("Mechanism Name");
+    // compute _computed for each record
+    (raw.records || []).forEach(r => {
+      // Determine cum_total following additive/non-additive
+      let cum = 0;
+      const ind = (r.Indicator || '').toString();
+      if (additiveIndicators.has(ind)) {
+        cum = N(r["Quarter 1"]) + N(r["Quarter 2"]) + N(r["Quarter 3"]) + N(r["Quarter 4"]);
+      } else if (nonAdditiveIndicators.has(ind)) {
+        cum = N(r["Quarter 4"]) || N(r["Quarter 3"]) || N(r["Quarter 2"]) || N(r["Quarter 1"]) || 0;
+      } else {
+        // fallback: if there is an explicit 'Numerator' and 'Denominator' fields, prefer Numerator as cum
+        if ('Numerator' in r) cum = N(r.Numerator);
+        else cum = N(r["Quarter 1"]) + N(r["Quarter 2"]) + N(r["Quarter 3"]) + N(r["Quarter 4"]);
+      }
+      const targ = (r.Targets===null||r.Targets===undefined)?0:N(r.Targets);
+      r._computed = { cum_total: cum, targets: targ, percent: (targ? (cum / targ * 100) : 0), numDenClass: classifyNumDen(r) };
+    });
 
-  const setOpts = (inst, arr) => {
-    inst.clearOptions();
-    arr.forEach(v => inst.addOption({ value: v, text: v }));
-    inst.refreshOptions(false);
+    // populate filters
+    populateFilters();
+    initFilters();
+    refreshAll();
+
+    // resize charts on window resize
+    window.addEventListener('resize', ()=> Object.values(charts).forEach(c=>c&&c.resize()));
+  } catch(err) {
+    console.error('Load error', err);
+    alert('Failed to load API: ' + err.message);
+  }
+}
+
+/* Populate filters from raw */
+function populateFilters() {
+  const recs = raw.records || [];
+  const unique = (k) => [...new Set(recs.map(r => r[k]).filter(Boolean))].sort((a,b)=>(''+a).localeCompare(''+b));
+  const years = unique('Fiscal Year').map(String);
+  const partners = unique('Partner Name');
+  const mechs = unique('Mechanism Name');
+  const inds = unique('Indicator');
+
+  // fill selects
+  const setOpts = (sel, arr) => {
+    const $s = $(sel);
+    $s.empty();
+    arr.forEach(v => $s.append(new Option(v, v, false, false)));
+    $s.trigger('change');
   };
 
-  setOpts(ts.indicator, indicators);
-  setOpts(ts.fy, fiscalYears);
-  setOpts(ts.age, ages);
-  setOpts(ts.sex, sexes);
-  setOpts(ts.partner, partners);
-  setOpts(ts.funding, funding);
-  setOpts(ts.mechanism, mechanisms);
+  setOpts('#fyFilter', years);
+  setOpts('#partnerFilter', partners);
+  setOpts('#mechanismFilter', mechs);
+  setOpts('#indicatorFilter', inds);
+
+  // Numerator/Denominator options based on heuristics found
+  const numDenClasses = ['Numerator','Denominator','Proportion','Other'];
+  setOpts('#numDenFilter', numDenClasses);
 }
 
-/* Cascade updates */
-function updatePartnerOptions(){
-  const selFA = getSelectedValues('fundingAgencyFilter');
-  const recs = apiData.records || [];
-  const partners = [...new Set(recs.filter(r=>!selFA.length||selFA.includes(r["Funding Agency"])).map(r=>r["Partner Name"]))].filter(Boolean).sort();
-  const cur = getSelectedValues('partnerFilter');
-  ts.partner.clearOptions();
-  partners.forEach(p => ts.partner.addOption({ value:p, text:p }));
-  ts.partner.setValue(cur.filter(x => partners.includes(x)));
-}
-function updateMechanismOptions(){
-  const selFA = getSelectedValues('fundingAgencyFilter');
-  const selPartners = getSelectedValues('partnerFilter');
-  const recs = apiData.records || [];
-  const mechs = [...new Set(recs.filter(r=>(!selFA.length||selFA.includes(r["Funding Agency"])) && (!selPartners.length||selPartners.includes(r["Partner Name"]))).map(r=>r["Mechanism Name"]))].filter(Boolean).sort();
-  const cur = getSelectedValues('mechanismFilter');
-  ts.mechanism.clearOptions();
-  mechs.forEach(m => ts.mechanism.addOption({ value:m, text:m }));
-  ts.mechanism.setValue(cur.filter(x => mechs.includes(x)));
-}
+/* Get filtered records respecting shared filters */
+function getFilteredRecords() {
+  const fy = $('#fyFilter').val() || [];
+  const partner = $('#partnerFilter').val() || [];
+  const mech = $('#mechanismFilter').val() || [];
+  const ind = $('#indicatorFilter').val() || [];
+  const numden = $('#numDenFilter').val() || [];
 
-/* Fetch API and initialize */
-async function loadData(){
-  try{
-    const res = await fetch(API_URL);
-    if(!res.ok) throw new Error(`HTTP ${res.status}`);
-    apiData = await res.json();
-
-    // compute cum_total & percent safety for raw records
-    (apiData.records || []).forEach(r=>{
-      let cum = 0;
-      if(additiveIndicators.includes(r.Indicator)) cum = N(r["Quarter 1"]) + N(r["Quarter 2"]) + N(r["Quarter 3"]) + N(r["Quarter 4"]);
-      else if(nonAdditiveIndicators.includes(r.Indicator)) cum = N(r["Quarter 4"]) || N(r["Quarter 3"]) || N(r["Quarter 2"]) || N(r["Quarter 1"]) || 0;
-      else cum = N(r["Quarter 1"]) + N(r["Quarter 2"]) + N(r["Quarter 3"]) + N(r["Quarter 4"]);
-      const targets = (r.Targets === undefined || r.Targets === null) ? null : N(r.Targets);
-      r._computed = { cum_total: cum, percent: (targets && targets !== 0) ? +(cum / targets * 100) : 0 };
-    });
-
-    // init selects
-    ts.funding = makeTom('#fundingAgencyFilter');
-    ts.partner = makeTom('#partnerFilter');
-    ts.mechanism = makeTom('#mechanismFilter');
-    ts.indicator = makeTom('#indicatorFilter');
-    ts.fy = makeTom('#fyFilter');
-    ts.age = makeTom('#ageFilter');
-    ts.sex = makeTom('#sexFilter');
-
-    populateFilters();
-
-    // cascade handlers
-    document.getElementById('fundingAgencyFilter').addEventListener('change', ()=>{
-      updatePartnerOptions(); updateMechanismOptions(); refreshDashboard();
-    });
-    document.getElementById('partnerFilter').addEventListener('change', ()=>{
-      updateMechanismOptions(); refreshDashboard();
-    });
-    ['mechanismFilter','indicatorFilter','fyFilter','ageFilter','sexFilter'].forEach(id=>{
-      document.getElementById(id).addEventListener('change', refreshDashboard);
-    });
-
-    document.getElementById('resetFilters').addEventListener('click', ()=>{
-      ['fundingAgencyFilter','partnerFilter','mechanismFilter','indicatorFilter','fyFilter','ageFilter','sexFilter'].forEach(id=>{
-        const inst = id==='fundingAgencyFilter' ? ts.funding : id==='partnerFilter' ? ts.partner : id==='mechanismFilter' ? ts.mechanism : id==='indicatorFilter' ? ts.indicator : id==='fyFilter' ? ts.fy : id==='ageFilter' ? ts.age : ts.sex;
-        inst.clear(true);
-      });
-      populateFilters(); refreshDashboard();
-    });
-
-    // tabs
-    document.querySelectorAll('.tab').forEach(t=>{
-      t.addEventListener('click', ()=>{
-        document.querySelectorAll('.tab').forEach(x=>x.classList.remove('active'));
-        document.querySelectorAll('.tab-content').forEach(c=>c.classList.remove('active'));
-        t.classList.add('active');
-        const id = t.dataset.tab;
-        document.getElementById(id).classList.add('active');
-        setTimeout(()=>Object.values(charts).forEach(c=>c&&c.resize()), 120);
-      });
-    });
-
-    refreshDashboard();
-    window.addEventListener('resize', ()=>Object.values(charts).forEach(c=>c&&c.resize()));
-
-  } catch(err) {
-    console.error('Failed to fetch API:', err);
-    alert('Failed to fetch data from API. Check backend at ' + API_URL + '\n\n' + err.message);
-  }
-}
-
-/* Get filtered records */
-function getFilteredRecords(){
-  const selFA = getSelectedValues('fundingAgencyFilter');
-  const selPartner = getSelectedValues('partnerFilter');
-  const selMech = getSelectedValues('mechanismFilter');
-  const selIndicator = getSelectedValues('indicatorFilter');
-  const selFY = getSelectedValues('fyFilter');
-  const selAge = getSelectedValues('ageFilter');
-  const selSex = getSelectedValues('sexFilter');
-
-  return (apiData.records || []).filter(r=>{
-    if(selFA.length && !selFA.includes(r["Funding Agency"])) return false;
-    if(selPartner.length && !selPartner.includes(r["Partner Name"])) return false;
-    if(selMech.length && !selMech.includes(r["Mechanism Name"])) return false;
-    if(selIndicator.length && !selIndicator.includes(r.Indicator)) return false;
-    if(selFY.length && !selFY.includes(String(r["Fiscal Year"]))) return false;
-    if(selAge.length && !selAge.includes(r["Coarse Age"])) return false;
-    if(selSex.length && !selSex.includes(r.Sex)) return false;
+  return (raw.records || []).filter(r => {
+    if (fy.length && !fy.includes(String(r["Fiscal Year"]))) return false;
+    if (partner.length && !partner.includes(r["Partner Name"])) return false;
+    if (mech.length && !mech.includes(r["Mechanism Name"])) return false;
+    if (ind.length && !ind.includes(r.Indicator)) return false;
+    if (numden.length && !numden.includes(r._computed.numDenClass)) return false;
     return true;
-  }).map(r => Object.assign({}, r));
+  });
 }
 
-/* Chart helpers */
-function baseGrid(){ return { left:70, right:100, top:60, bottom:90 }; }
+/* ---------- CHART UTILITIES ---------- */
+function safeInit(id) {
+  charts[id] = charts[id] || echarts.init(document.getElementById(id + '_wrap'));
+  return charts[id];
+}
 
-/* FY chart - BAR ONLY */
-function renderFYChart(records){
-  charts.fy = charts.fy || echarts.init(document.getElementById('targetChart'));
-  const years = [...new Set(records.map(r=>r["Fiscal Year"]))].sort();
-  const targets = years.map(y => records.filter(r=>r["Fiscal Year"]==y).reduce((s,r)=>s + (N(r.Targets)||0),0));
-  const achieved = years.map(y => records.filter(r=>r["Fiscal Year"]==y).reduce((s,r)=>s + (r._computed ? r._computed.cum_total : 0),0));
-  const pct = years.map((y,i)=> targets[i] ? (achieved[i] / targets[i] * 100) : 0);
-  const maxPct = Math.max(...pct, 10);
+/* shared dataZoom for horizontal category axes */
+function horizontalDataZoom() {
+  return [
+    { type:'slider', show:true, start:0, end:40, height:10, bottom:8 },
+    { type:'inside' }
+  ];
+}
 
-  charts.fy.setOption({
-    title:{ text:'Achievement vs Targets by Fiscal Year (bar only)', left:'center' },
-    grid: baseGrid(),
+/* ---------- 1. Targets chart (bars represent % achievements) ---------- */
+function renderTargetsChart(recs) {
+  const ch = safeInit('targetChart');
+  const years = [...new Set(recs.map(r => String(r["Fiscal Year"])).filter(Boolean))].sort();
+  if (!years.length) { ch.setOption({ title:{text:'No data'}, series:[] }); return; }
+
+  // compute totals per year following _computed.percent semantics
+  const totalTargets = years.map(y => recs.filter(r=>String(r["Fiscal Year"])===y).reduce((s,r)=>s + (r._computed? r._computed.targets:0),0));
+  const totalAch = years.map(y => recs.filter(r=>String(r["Fiscal Year"])===y).reduce((s,r)=>s + (r._computed? r._computed.cum_total:0),0));
+  const pct = years.map((y,i)=> totalTargets[i] ? (totalAch[i] / totalTargets[i] * 100) : 0);
+
+  const option = {
+    title:{ text:'Achievement (% basis) — Fiscal Year', left:'center' },
     tooltip:{ trigger:'axis', formatter: params => {
-      const idx = params[0].dataIndex;
-      const t = targets[idx] || 0;
-      const a = achieved[idx] || 0;
-      const p = pct[idx] || 0;
-      return `${params[0].axisValue}<br>Targets: ${formatNumber(t)}<br>Achieved: ${formatNumber(a)} (${Math.round(p)}%)`;
-    } },
-    xAxis:{ type:'category', data: years.map(String), axisLabel:{interval:0} },
-    yAxis:{ type:'value', name:'Count' },
-    series:[
-      { name:'Targets', type:'bar', data: targets, itemStyle:{color:'#1976d2'}, label:{show:true, position:'top', formatter: v => formatNumber(v.data)} },
-      { name:'Achieved', type:'bar', data: achieved, itemStyle:{color:'#2e7d32'}, label:{show:true, position:'top', formatter: (v) => {
-          const idx = v.dataIndex; const p = pct[idx] || 0; return `${formatNumber(v.data)} (${Math.round(p)}%)`;
-        }} }
-    ]
-  });
-}
-
-/* Gauge for Overall Achievement - placed in overallGaugeBox */
-function renderGauge(records){
-  // compute overall
-  const totalTargets = records.reduce((s,r)=>s + (N(r.Targets)||0),0);
-  const totalAch = records.reduce((s,r)=>s + (r._computed ? r._computed.cum_total : 0),0);
-  const pct = totalTargets ? (totalAch / totalTargets * 100) : 0;
-
-  charts.gauge = charts.gauge || echarts.init(document.getElementById('overallGaugeBox'));
-  charts.gauge.setOption({
-    title:{ text:'Overall Achievement', left:'center' },
+      const i = params[0].dataIndex;
+      return `${years[i]}<br>Targets: ${fmtN(totalTargets[i])}<br>Achieved: ${fmtN(totalAch[i])} (${Math.round(pct[i])}%)`;
+    }},
+    legend: { top: 10, data: ['% Achieved'], selectedMode:'multiple' },
+    grid: { left:80, right:40, top:80, bottom:90 },
+    xAxis: { type:'category', data: years, axisLabel:{ interval:0, rotate:0, formatter:v=>v } },
+    yAxis: { type:'value', name:'% Achievement', min:0, max: Math.max(...pct,10)*1.2, axisLabel:{ formatter: v => `${Math.round(v)}%` } },
+    dataZoom: horizontalDataZoom(),
     series: [{
-      type: 'gauge',
-      startAngle: 200,
-      endAngle: -20,
-      min: 0,
-      max: 150,
-      splitNumber: 5,
-      radius: '85%',
-      axisLine: {
-        lineStyle: {
-          width: 18,
-          color: [
-            [0.6, '#e53935'],
-            [1.0, '#ffb74d'],
-            [1.5, '#2e7d32']
-          ]
-        }
-      },
-      pointer: { length: '65%' },
-      axisTick: { distance: -20, length: 6 },
-      axisLabel: { distance: -36, color: '#999' },
-      detail: {
-        valueAnimation: true,
-        formatter: function(val) {
-          return `${val.toFixed(0)}%\n${formatNumber(totalAch)} / ${formatNumber(totalTargets)}`;
-        },
-        fontSize: 12
-      },
-      data: [{ value: Math.min(pct, 150), name: 'Achievement' }]
+      name: '% Achieved',
+      type: 'bar',
+      data: pct.map(v => +(v.toFixed(2))),
+      itemStyle:{ color:'#1976d2' },
+      label:{ show:true, position:'top', formatter: params => {
+        const idx = params.dataIndex;
+        return labelCountPct(totalAch[idx], pct[idx]);
+      }}
     }]
-  });
-  // update summary small pct
-  document.getElementById('overallSummaryPct').innerText = `${Math.round(pct)}%`;
+  };
+  ch.setOption(option);
 }
 
-/* Quarterly chart at bottom - Grouped: Fiscal Years (top) + Quarters (below) */
-function renderQuarterly(records){
-  charts.quarter = charts.quarter || echarts.init(document.getElementById('quarterlyChart'));
-
-  // derive last 5 fiscal years from filtered records
-  const yearsAvailable = [...new Set(records.map(r=>r["Fiscal Year"]))].filter(Boolean).sort((a,b)=>a-b).map(String);
-  const yearsToUse = yearsAvailable.slice(-5);
-
-  // quarter labels (constant)
-  const quarterLabels = ['Q1','Q2','Q3','Q4'];
-
-  // Build data array in sequence for each year->quarter (year major, quarter minor)
-  const dataVals = [];
-  const dataPct = [];
-  const categoryPairs = []; // holds {year,q}
-  // if there are no records, create placeholders to avoid errors
-  yearsToUse.forEach(y=>{
-    quarterLabels.forEach(q=>{
-      categoryPairs.push({ year: y, quarter: q });
-      const qVal = records.filter(r=>String(r["Fiscal Year"])===String(y)).reduce((s,r)=>{
-        if(q==='Q1') return s + N(r["Quarter 1"]);
-        if(q==='Q2') return s + N(r["Quarter 2"]);
-        if(q==='Q3') return s + N(r["Quarter 3"]);
-        if(q==='Q4') return s + N(r["Quarter 4"]);
-        return s;
-      },0);
-      dataVals.push(qVal);
-    });
-  });
-
-  // compute approximate quarter target by dividing total targets across quarters for scaling/percent
-  const totalTargets = records.reduce((s,r)=>s + (N(r.Targets)||0),0);
-  const avgQuarterTarget = (totalTargets / Math.max(1, yearsToUse.length * 4));
-
-  // pct per point relative to avgQuarterTarget (fallback)
-  for(let i=0;i<dataVals.length;i++){
-    const pct = avgQuarterTarget ? (dataVals[i] / avgQuarterTarget * 100) : 0;
-    dataPct.push(pct);
-  }
-
-  // Build a custom axis label array where the top axis shows years centered across their 4 quarters, and the bottom axis shows quarters repeating
-  // ECharts technique: use two category axes both positioned bottom; the top one with offset 30 denotes fiscal years (one tick per group),
-  // the bottom axis shows quarters for each bar. We'll map series to bottom axis (index 1).
-  // Build xAxisIndex=1 data that represent quarter labels repeated (for bars).
-  const xAxisQuarters = categoryPairs.map(cp => cp.quarter + '\n' + cp.year); // fallback label if needed
-
-  charts.quarter.setOption({
-    title:{ text:'Quarterly Trend — grouped by Fiscal Year', left:'center' },
-    grid: { left:60, right:80, top:70, bottom:110 },
-
-    tooltip: {
-      trigger: 'axis',
-      axisPointer: { type: 'shadow' },
-      formatter: function (params) {
-        const p = params[0];
-        const idx = p.dataIndex;
-        const cp = categoryPairs[idx] || {};
-        const yr = cp.year || '';
-        const q = cp.quarter || '';
-        return `${yr} ${q}<br>Total: ${formatNumber(dataVals[idx])} (${Math.round(dataPct[idx])}%)`;
-      }
-    },
-
-    xAxis: [
-      {
-        // top axis - fiscal years (one tick per fiscal year)
-        type: 'category',
-        position: 'bottom',
-        data: yearsToUse,
-        axisTick: { alignWithLabel: true },
-        axisLabel: { fontSize: 12, padding: [6,0,0,0], interval:0 }
-      },
-      {
-        // bottom axis - quarter labels repeated across years (actual categories for bars)
-        type: 'category',
-        position: 'bottom',
-        offset: 36,
-        data: xAxisQuarters,
-        axisLabel: {
-          fontSize: 11,
-          formatter: function (value) {
-            // value looks like 'QX\nYYYY' because we built it that way; display as Quarter on first line and year below
-            return value;
-          }
-        },
-        axisTick: { alignWithLabel: true }
-      }
-    ],
-
-    yAxis: [
-      { type:'value', name:'Count', axisLabel:{formatter:v=>formatNumber(v)} },
-      { type:'value', name:'% Achievement', position:'right', min:0, max: Math.max(...dataPct, 10) * 1.25, axisLabel:{formatter: v => `${Math.round(v)}%`} }
-    ],
-
-    series:[
-      {
-        name:'Total',
-        type:'bar',
-        xAxisIndex: 1,
-        data: dataVals,
-        itemStyle:{color:'#1976d2'},
-        label:{show:true, position:'top', formatter: (p)=> {
-          const idx = p.dataIndex;
-          return `${formatNumber(dataVals[idx])} (${Math.round(dataPct[idx])}%)`;
-        }}
-      },
-      {
-        name:'% Achievement',
-        type:'line',
-        yAxisIndex:1,
-        xAxisIndex: 1,
-        data: dataPct,
-        smooth:true,
-        symbol: 'circle',
-        symbolSize:6,
-        itemStyle:{color:'#ff9800'},
-        lineStyle:{width:2},
-        showSymbol: true
-      }
-    ]
-  });
-
-  // adjust label rotation if necessary to fit
-  charts.quarter.resize();
-}
-
-/* Partner horizontal chart, sorted ascending by percent */
-function renderPartnerChart(records){
-  charts.partner = charts.partner || echarts.init(document.getElementById('partnerChart'));
-  const partners = [...new Set(records.map(r=>r["Partner Name"]))].filter(Boolean);
+/* ---------- 2. Partner chart (bars = % achievement) ---------- */
+function renderPartnerChart(recs) {
+  const ch = safeInit('partnerChart');
+  // aggregate by partner
+  const partners = [...new Set(recs.map(r=>r["Partner Name"]).filter(Boolean))];
   const agg = partners.map(p=>{
-    const recs = records.filter(r=>r["Partner Name"]===p);
-    const targ = recs.reduce((s,r)=>s + (N(r.Targets)||0),0);
-    const ach = recs.reduce((s,r)=>s + (r._computed ? r._computed.cum_total : 0),0);
-    const pct = targ ? (ach / targ * 100) : 0;
-    return {p, targ, ach, pct};
-  }).filter(a=>a.p).sort((a,b)=>a.pct - b.pct); // ascending
+    const rs = recs.filter(r=>r["Partner Name"]===p);
+    const targ = rs.reduce((s,r)=>s + (r._computed? r._computed.targets:0),0);
+    const ach = rs.reduce((s,r)=>s + (r._computed? r._computed.cum_total:0),0);
+    const pct = targ? (ach / targ * 100) : 0;
+    return { p, targ, ach, pct };
+  }).filter(x=> (x.targ>0 || x.ach>0)).sort((a,b)=>a.pct - b.pct); // ASC
 
-  const names = agg.map(a=>a.p);
-  const targVals = agg.map(a=>a.targ);
-  const achVals = agg.map(a=>a.ach);
-  const pctVals = agg.map(a=>a.pct);
-  const maxPct = Math.max(...pctVals, 10);
+  const names = agg.map(x=>x.p);
+  const pctVals = agg.map(x=>+(x.pct.toFixed(2)));
+  const achVals = agg.map(x=>x.ach);
+  const targVals = agg.map(x=>x.targ);
 
-  charts.partner.setOption({
-    title:{ text:'Achievement vs Targets by Partner (ascending)', left:'center' },
-    grid:{ left:180, right:120, top:60, bottom:60 },
-    tooltip:{ trigger:'axis', axisPointer:{type:'shadow'}, formatter: params =>{
-      const idx = params[0].dataIndex;
-      return `${names[idx]}<br>Targets: ${formatNumber(targVals[idx])}<br>Achieved: ${formatNumber(achVals[idx])} (${Math.round(pctVals[idx])}%)`;
+  const option = {
+    title:{ text:'Partners — % Achievement (ascending)', left:'center' },
+    tooltip:{ trigger:'axis', axisPointer:{ type:'shadow' }, formatter: params => {
+      const i = params[0].dataIndex;
+      return `${names[i]}<br>Targets: ${fmtN(targVals[i])}<br>Achieved: ${fmtN(achVals[i])} (${Math.round(pctVals[i])}%)`;
     }},
-    xAxis:[ { type:'value', name:'Count' }, { type:'value', name:'% Achievement', position:'top', min:0, max: Math.ceil(maxPct*1.2), axisLabel:{formatter:v=>`${Math.round(v)}%`} } ],
-    yAxis:[ { type:'category', data: names, axisLabel:{interval:0, formatter:function(v){ return v; }} } ],
-    series:[
-      { name:'Targets', type:'bar', data: targVals, itemStyle:{color:'#1976d2'}, label:{show:true, position:'right', formatter: (p)=> {
-          const i = p.dataIndex; return formatNumWithPct(achVals[i], pctVals[i]); } } },
-      { name:'Achieved', type:'bar', data: achVals, itemStyle:{color:'#2e7d32'}, label:{show:false} }
-    ]
-  });
+    legend:{ top:10, data:['% Achieved'], selectedMode:'multiple' },
+    grid:{ left:180, right:80, top:80, bottom:60 },
+    xAxis:{ type:'value', name:'% Achievement', axisLabel:{ formatter: v => `${Math.round(v)}%` } },
+    yAxis:{ type:'category', data: names, axisLabel:{ interval:0 } },
+    series:[{
+      name:'% Achieved',
+      type:'bar',
+      data: pctVals,
+      itemStyle:{ color:'#2e7d32' },
+      label:{ show:true, position:'right', formatter: p => {
+        const i = p.dataIndex;
+        return labelCountPct(achVals[i], pctVals[i]);
+      }}
+    }],
+    dataZoom: [ { type:'slider', show:true, yAxisIndex:0, start:0, end:40 }, { type:'inside', yAxisIndex:0 } ]
+  };
+  ch.setOption(option);
 }
 
-/* Mechanism horizontal chart, sorted ascending by percent */
-function renderMechanismChart(records){
-  charts.mechanism = charts.mechanism || echarts.init(document.getElementById('mechanismChart'));
-  const mechs = [...new Set(records.map(r=>r["Mechanism Name"]))].filter(Boolean);
+/* ---------- 3. Mechanism chart (bars = % achievement) ---------- */
+function renderMechanismChart(recs) {
+  const ch = safeInit('mechanismChart');
+  const mechs = [...new Set(recs.map(r=>r["Mechanism Name"]).filter(Boolean))];
   const agg = mechs.map(m=>{
-    const recs = records.filter(r=>r["Mechanism Name"]===m);
-    const targ = recs.reduce((s,r)=>s + (N(r.Targets)||0),0);
-    const ach = recs.reduce((s,r)=>s + (r._computed ? r._computed.cum_total : 0),0);
-    const pct = targ ? (ach / targ * 100) : 0;
-    return {m, targ, ach, pct};
-  }).filter(a=>a.m).sort((a,b)=>a.pct - b.pct); // ascending
+    const rs = recs.filter(r=>r["Mechanism Name"]===m);
+    const targ = rs.reduce((s,r)=>s + (r._computed? r._computed.targets:0),0);
+    const ach = rs.reduce((s,r)=>s + (r._computed? r._computed.cum_total:0),0);
+    const pct = targ? (ach / targ * 100) : 0;
+    return { m, targ, ach, pct };
+  }).filter(x=> (x.targ>0 || x.ach>0)).sort((a,b)=>a.pct - b.pct); // ASC
 
-  const names = agg.map(a=>a.m);
-  const targVals = agg.map(a=>a.targ);
-  const achVals = agg.map(a=>a.ach);
-  const pctVals = agg.map(a=>a.pct);
-  const maxPct = Math.max(...pctVals, 10);
+  const names = agg.map(x=>x.m);
+  const pctVals = agg.map(x=>+(x.pct.toFixed(2)));
+  const achVals = agg.map(x=>x.ach);
+  const targVals = agg.map(x=>x.targ);
 
-  charts.mechanism.setOption({
-    title:{ text:'Achievement vs Targets by Mechanism (ascending)', left:'center' },
-    grid:{ left:180, right:120, top:60, bottom:60 },
-    tooltip:{ trigger:'axis', axisPointer:{type:'shadow'}, formatter: params =>{
-      const idx = params[0].dataIndex;
-      return `${names[idx]}<br>Targets: ${formatNumber(targVals[idx])}<br>Achieved: ${formatNumber(achVals[idx])} (${Math.round(pctVals[idx])}%)`;
+  const option = {
+    title:{ text:'Mechanisms — % Achievement (ascending)', left:'center' },
+    tooltip:{ trigger:'axis', axisPointer:{ type:'shadow' }, formatter: params => {
+      const i = params[0].dataIndex;
+      return `${names[i]}<br>Targets: ${fmtN(targVals[i])}<br>Achieved: ${fmtN(achVals[i])} (${Math.round(pctVals[i])}%)`;
     }},
-    xAxis:[ { type:'value', name:'Count' }, { type:'value', name:'% Achievement', position:'top', min:0, max: Math.ceil(maxPct*1.2), axisLabel:{formatter:v=>`${Math.round(v)}%`} } ],
-    yAxis:[ { type:'category', data: names, axisLabel:{interval:0, formatter:function(v){ return v; }} } ],
+    legend:{ top:10, data:['% Achieved'], selectedMode:'multiple' },
+    grid:{ left:180, right:80, top:80, bottom:60 },
+    xAxis:{ type:'value', name:'% Achievement', axisLabel:{ formatter: v => `${Math.round(v)}%` } },
+    yAxis:{ type:'category', data: names, axisLabel:{ interval:0 } },
+    series:[{
+      name:'% Achieved',
+      type:'bar',
+      data: pctVals,
+      itemStyle:{ color:'#1976d2' },
+      label:{ show:true, position:'right', formatter: p => {
+        const i = p.dataIndex;
+        return labelCountPct(achVals[i], pctVals[i]);
+      }}
+    }],
+    dataZoom: [ { type:'slider', show:true, yAxisIndex:0, start:0, end:40 }, { type:'inside', yAxisIndex:0 } ]
+  };
+  ch.setOption(option);
+}
+
+/* ---------- 4. Bottom indicators (excludes blanks/zeros) ---------- */
+function renderBottomIndicators(recs) {
+  const ch = safeInit('bottomIndicators');
+  const inds = [...new Set(recs.map(r=>r.Indicator).filter(Boolean))];
+  const agg = inds.map(ind=>{
+    const rs = recs.filter(r=>r.Indicator===ind);
+    const targ = rs.reduce((s,r)=>s + (r._computed? r._computed.targets:0),0);
+    const ach = rs.reduce((s,r)=>s + (r._computed? r._computed.cum_total:0),0);
+    const pct = targ? (ach / targ * 100):0;
+    return { ind, targ, ach, pct };
+  }).filter(x=>x.targ>0 && x.ach>0).sort((a,b)=>a.pct - b.pct).slice(0,10);
+
+  const names = agg.map(x=>x.ind);
+  const pctVals = agg.map(x=>+(x.pct.toFixed(2)));
+  const achVals = agg.map(x=>x.ach);
+  const targVals = agg.map(x=>x.targ);
+
+  const option = {
+    title:{ text:'Bottom 10 Indicators (excl blanks/zeros)', left:'center' },
+    tooltip:{ trigger:'axis', formatter: params => {
+      const i = params[0].dataIndex;
+      return `${names[i]}<br>Targets: ${fmtN(targVals[i])}<br>Achieved: ${fmtN(achVals[i])} (${Math.round(pctVals[i])}%)`;
+    }},
+    legend:{ top:10, data:['% Achieved'], selectedMode:'multiple' },
+    grid:{ left:120, right:80, top:80, bottom:60 },
+    xAxis:{ type:'value', name:'% Achievement', axisLabel:{ formatter: v => `${Math.round(v)}%` } },
+    yAxis:{ type:'category', data: names, axisLabel:{ interval:0 } },
+    series:[{ type:'bar', data:pctVals, itemStyle:{ color:'#e53935' }, label:{ show:true, position:'right', formatter:(p)=> labelCountPct(achVals[p.dataIndex], pctVals[p.dataIndex]) } }],
+    dataZoom: [ { type:'slider', show:true, yAxisIndex:0, start:0, end:60 }, { type:'inside', yAxisIndex:0 } ]
+  };
+  ch.setOption(option);
+}
+
+/* ---------- 5. Quarterly Trend — Quarters on TOP, Fiscal years BELOW ---------- */
+function renderQuarterlyTrend(recs) {
+  const ch = safeInit('quarterlyTrend');
+
+  const years = [...new Set(recs.map(r=>String(r["Fiscal Year"])).filter(Boolean))].sort();
+  const yearsToUse = years.slice(-5);
+  if (!yearsToUse.length) { ch.setOption({ title:{text:'No quarterly data'}, series:[] }); return; }
+
+  const quarters = ['Q1','Q2','Q3','Q4'];
+  const categoryPairs = [];
+  yearsToUse.forEach(y => quarters.forEach(q => categoryPairs.push({ year:y, quarter:q })));
+  const dataVals = categoryPairs.map(cp => {
+    const rs = recs.filter(r=>String(r["Fiscal Year"])===cp.year);
+    if(!rs.length) return 0;
+    if (cp.quarter==='Q1') return rs.reduce((s,r)=>s + N(r["Quarter 1"]),0);
+    if (cp.quarter==='Q2') return rs.reduce((s,r)=>s + N(r["Quarter 2"]),0);
+    if (cp.quarter==='Q3') return rs.reduce((s,r)=>s + N(r["Quarter 3"]),0);
+    if (cp.quarter==='Q4') return rs.reduce((s,r)=>s + N(r["Quarter 4"]),0);
+    return 0;
+  });
+
+  // avg quarter target for percent
+  const totalTargets = recs.reduce((s,r)=>s + (r._computed? r._computed.targets:0),0);
+  const avgQuarterTarget = totalTargets? (totalTargets / (yearsToUse.length * 4)) : 0;
+  const dataPct = dataVals.map(v => avgQuarterTarget ? (v / avgQuarterTarget * 100) : 0);
+
+  // x-axis lists
+  const xAxisQuarters = categoryPairs.map(cp => cp.quarter); // repeated quarters (top)
+  // years row: show year only for first quarter of its group, else show empty to avoid repeating
+  const xAxisYears = categoryPairs.map((cp, idx) => (idx % 4 === 0 ? cp.year : ''));
+
+  const option = {
+    title:{ text:'Quarterly Trend — Quarters (top) | Fiscal Year (below)', left:'center' },
+    tooltip:{ trigger:'axis', axisPointer:{ type:'shadow' }, formatter: params => {
+      const p = params[0];
+      const idx = p.dataIndex;
+      const cp = categoryPairs[idx] || {};
+      return `${cp.year} ${cp.quarter}<br>Total: ${fmtN(dataVals[idx])} (${Math.round(dataPct[idx])}%)`;
+    }},
+    legend:{ top:10, data:['Total','% Achievement'], selectedMode:'multiple' },
+    grid:{ left:70, right:80, top:90, bottom:120 },
+    xAxis:[
+      { // quarters (top)
+        type:'category', position:'bottom', offset:0, data:xAxisQuarters,
+        axisLabel:{ interval:0, fontSize:12, formatter: v => v }
+      },
+      { // years (below)
+        type:'category', position:'bottom', offset:36, data:xAxisYears,
+        axisLabel:{ interval:0, fontSize:12, formatter: v => v }
+      }
+    ],
+    yAxis:[
+      { type:'value', name:'Count', axisLabel:{ formatter: v => fmtN(v) } },
+      { type:'value', name:'% Achievement', position:'right', min:0, max: Math.max(...dataPct,10) * 1.25, axisLabel:{ formatter: v => `${Math.round(v)}%` } }
+    ],
+    dataZoom: [ { type:'slider', show:true, start:0, end:40, bottom:12 }, { type:'inside' } ],
     series:[
-      { name:'Targets', type:'bar', data: targVals, itemStyle:{color:'#1976d2'}, label:{show:true, position:'right', formatter: (p)=> {
-          const i = p.dataIndex; return formatNumWithPct(achVals[i], pctVals[i]); } } },
-      { name:'Achieved', type:'bar', data: achVals, itemStyle:{color:'#2e7d32'}, label:{show:false} }
+      { name:'Total', type:'bar', xAxisIndex:0, data:dataVals, itemStyle:{ color:'#1976d2' }, label:{ show:true, position:'top', formatter: p => labelCountPct(dataVals[p.dataIndex], dataPct[p.dataIndex]) } },
+      { name:'% Achievement', type:'line', yAxisIndex:1, xAxisIndex:0, data:dataPct.map(v=>+(v.toFixed(2))), smooth:true, symbol:'circle', symbolSize:6, itemStyle:{ color:'#ff9800' } }
     ]
+  };
+
+  ch.setOption(option);
+  ch.resize();
+}
+
+/* ---------- 6. Trends & Insights small charts (top partners/mechanisms/indicators) ---------- */
+function renderSmallTrends(recs) {
+  // topIndicators
+  const topIndCh = safeInit('topIndicators');
+  const topPartnersCh = safeInit('topPartners');
+  const topMechsCh = safeInit('topMechanisms');
+
+  // indicators
+  const inds = [...new Set(recs.map(r=>r.Indicator).filter(Boolean))];
+  const indAgg = inds.map(ind => {
+    const rs = recs.filter(r=>r.Indicator===ind);
+    const targ = rs.reduce((s,r)=>s + (r._computed? r._computed.targets:0),0);
+    const ach = rs.reduce((s,r)=>s + (r._computed? r._computed.cum_total:0),0);
+    const pct = targ? (ach / targ * 100) : 0;
+    return { ind, pct };
+  }).filter(x=>x.pct!==undefined).sort((a,b)=>b.pct - a.pct).slice(0,10);
+
+  topIndCh.setOption({
+    title:{ text:'Top Indicators (% Achieved)', left:'center' },
+    legend:{ top:10 },
+    xAxis:{ type:'category', data: indAgg.map(x=>x.ind), axisLabel:{ rotate:45 } },
+    yAxis:{ type:'value', min:0, max: Math.max(...indAgg.map(x=>x.pct),10)*1.25 },
+    series:[ { type:'bar', data: indAgg.map(x=>Math.round(x.pct)), label:{ show:true, formatter:'{c}%' } } ]
+  });
+
+  // partners
+  const partners = [...new Set(recs.map(r=>r["Partner Name"]).filter(Boolean))];
+  const pAgg = partners.map(p=> {
+    const rs = recs.filter(r=>r["Partner Name"]===p);
+    const targ = rs.reduce((s,r)=>s + (r._computed? r._computed.targets:0),0);
+    const ach = rs.reduce((s,r)=>s + (r._computed? r._computed.cum_total:0),0);
+    const pct = targ? (ach / targ * 100):0;
+    return { p, pct };
+  }).sort((a,b)=>b.pct - a.pct).slice(0,10);
+
+  topPartnersCh.setOption({ title:{text:'Top Partners'}, legend:{top:10}, xAxis:{ type:'category', data:pAgg.map(x=>x.p) }, yAxis:{ type:'value' }, series:[ { type:'bar', data:pAgg.map(x=>Math.round(x.pct)), label:{show:true, formatter:'{c}%'} } ] });
+
+  // mechanisms
+  const mechs = [...new Set(recs.map(r=>r["Mechanism Name"]).filter(Boolean))];
+  const mAgg = mechs.map(m=> {
+    const rs = recs.filter(r=>r["Mechanism Name"]===m);
+    const targ = rs.reduce((s,r)=>s + (r._computed? r._computed.targets:0),0);
+    const ach = rs.reduce((s,r)=>s + (r._computed? r._computed.cum_total:0),0);
+    const pct = targ? (ach / targ * 100):0;
+    return { m, pct };
+  }).sort((a,b)=>b.pct - a.pct).slice(0,10);
+
+  topMechsCh.setOption({ title:{text:'Top Mechanisms'}, legend:{top:10}, xAxis:{ type:'category', data:mAgg.map(x=>x.m) }, yAxis:{ type:'value' }, series:[ { type:'bar', data:mAgg.map(x=>Math.round(x.pct)), label:{show:true, formatter:'{c}%'} } ] });
+}
+
+/* ---------- 7. QoC charts (Line race, Bar race, Numerator/Denominator proportion) ---------- */
+function renderQoC(recs) {
+  const chLine = safeInit('qocLineRace');
+  const chBar = safeInit('qocBarRace');
+  const chNumDen = safeInit('qocNumDen');
+
+  // For Line race: time series of a select QoC indicator (we'll take top indicator by count or user-filtered indicator)
+  // We'll build FY-wise proportions for proportion-class records OR compute proportion = num/den if both available.
+
+  // Build dataset: group by Fiscal Year and Indicator Type
+  const years = [...new Set(recs.map(r=>String(r["Fiscal Year"])).filter(Boolean))].sort();
+  const indicators = [...new Set(recs.map(r=>r.Indicator).filter(Boolean))];
+
+  // Choose indicator to plot (if user selected, use that; else pick first proportion-type or first indicator)
+  const selIndicator = $('#indicatorFilter').val();
+  let chosenIndicator = (selIndicator && selIndicator.length) ? selIndicator[0] : null;
+  if (!chosenIndicator) {
+    // prefer proportion-type indicator
+    const prop = indicators.find(ind => ind && /RATE|RATIO|PVLS|PV|PROPORTION|PCT/i.test(ind));
+    chosenIndicator = prop || indicators[0] || null;
+  }
+  // Build line series: for chosenIndicator compute percent per FY
+  const lineData = years.map(y => {
+    const rs = recs.filter(r=>String(r["Fiscal Year"])===y && r.Indicator===chosenIndicator);
+    if (!rs.length) return 0;
+    // if record has Numerator & Denominator fields compute proportion
+    const nums = rs.reduce((s,r)=> s + (r.Numerator? N(r.Numerator) : (r._computed? r._computed.cum_total:0) ), 0);
+    const dens = rs.reduce((s,r)=> s + (r.Denominator? N(r.Denominator) : (r.Targets? N(r.Targets) : 0) ), 0);
+    return dens ? (nums / dens * 100) : (rs.reduce((s,r)=>s + (r._computed? r._computed.percent:0),0) / rs.length);
+  });
+
+  chLine.setOption({
+    title: { text: `QoC - ${chosenIndicator} (Line race by FY)`, left:'center' },
+    legend: { top:10 },
+    tooltip: { trigger:'axis', formatter: params => {
+      const i = params[0].dataIndex;
+      return `${years[i]}<br>${chosenIndicator}<br>${fmtPct(Math.round(lineData[i]))}`;
+    }},
+    xAxis: { type:'category', data: years },
+    yAxis: { type:'value', min:0, max: Math.max(...lineData,10) * 1.25, axisLabel:{ formatter: v => `${Math.round(v)}%` } },
+    series: [{ name: chosenIndicator, type:'line', data: lineData.map(v=>+(v.toFixed(2))), smooth:true, symbol:'circle', symbolSize:8, itemStyle:{ color:'#00695c' }, animationDuration:1500 }]
+  });
+
+  // Bar race: Top indicators by proportion in latest FY
+  const latestFY = years.slice(-1)[0];
+  const barAgg = indicators.map(ind => {
+    const rs = recs.filter(r=>r.Indicator===ind && String(r["Fiscal Year"])===latestFY);
+    const targ = rs.reduce((s,r)=> s + (r.Targets? N(r.Targets) : 0), 0);
+    const ach = rs.reduce((s,r)=> s + (r.Numerator? N(r.Numerator) : (r._computed? r._computed.cum_total:0)), 0);
+    const pct = targ? (ach / targ * 100) : (rs.length? (rs.reduce((s,r)=>s + (r._computed? r._computed.percent:0),0) / rs.length) : 0);
+    return { ind, pct, ach, targ };
+  }).filter(x=>x.ind).sort((a,b)=>b.pct - a.pct).slice(0,10);
+
+  chBar.setOption({
+    title:{ text: `QoC Bar Race — Top (FY ${latestFY || ''})`, left:'center' },
+    tooltip:{ trigger:'axis', formatter: params => {
+      const i = params[0].dataIndex;
+      return `${barAgg[i].ind}<br>Targets: ${fmtN(barAgg[i].targ)}<br>Achieved: ${fmtN(barAgg[i].ach)} (${Math.round(barAgg[i].pct)}%)`;
+    }},
+    legend:{ top:10 },
+    xAxis:{ type:'value', axisLabel:{ formatter:v=>`${Math.round(v)}%` } },
+    yAxis:{ type:'category', data: barAgg.map(x=>x.ind) },
+    series:[ { type:'bar', data: barAgg.map(x=>+(x.pct.toFixed(2))), itemStyle:{ color:'#8e24aa' }, label:{ show:true, position:'right', formatter:(p)=> `${fmtN(barAgg[p.dataIndex].ach)} (${Math.round(barAgg[p.dataIndex].pct)}%)`} } ],
+    dataZoom: [ { type:'slider', show:true, yAxisIndex:0, start:0, end:60 }, { type:'inside', yAxisIndex:0 } ]
+  });
+
+  // Numerator/Denominator proportion chart: stacked bars with proportion line
+  // Build dataset grouped by Indicator or by Partner (choose indicator-level)
+  const ndIndicators = indicators.slice(0,10); // limit for readability
+  const numerators = ndIndicators.map(ind => recs.filter(r=>r.Indicator===ind).reduce((s,r)=> s + (r.Numerator? N(r.Numerator) : (r._computed? r._computed.cum_total:0)),0));
+  const denominators = ndIndicators.map(ind => recs.filter(r=>r.Indicator===ind).reduce((s,r)=> s + (r.Denominator? N(r.Denominator) : (r.Targets? N(r.Targets) : 0)),0));
+  const proportions = numerators.map((num,i)=> denominators[i] ? (num / denominators[i] * 100) : 0);
+
+  chNumDen.setOption({
+    title:{ text:'Numerator / Denominator (and proportion)', left:'center' },
+    tooltip:{ trigger:'axis', axisPointer:{ type:'shadow' }, formatter: params => {
+      const i = params[0].dataIndex;
+      return `${ndIndicators[i]}<br>Numerator: ${fmtN(numerators[i])}<br>Denominator: ${fmtN(denominators[i])}<br>Proportion: ${Math.round(proportions[i])}%`;
+    }},
+    legend:{ top:10, data:['Numerator','Denominator','Proportion'], selectedMode:'multiple' },
+    xAxis:{ type:'category', data: ndIndicators, axisLabel:{ rotate:30 } },
+    yAxis:[ { type:'value', name:'Count' }, { type:'value', name:'Proportion %', position:'right', min:0, max: Math.max(...proportions,10) * 1.25 } ],
+    series:[
+      { name:'Numerator', type:'bar', stack:'counts', data: numerators, itemStyle:{ color:'#2196f3' } },
+      { name:'Denominator', type:'bar', stack:'counts', data: denominators, itemStyle:{ color:'#90caf9' } },
+      { name:'Proportion', type:'line', yAxisIndex:1, data: proportions.map(v=>+(v.toFixed(2))), smooth:true, symbol:'circle', symbolSize:6, itemStyle:{ color:'#ff5722' } }
+    ],
+    dataZoom: [ { type:'slider', show:true, start:0, end:60 }, { type:'inside' } ]
   });
 }
 
-/* Trends & Insights */
-function renderTrends(records){
-  charts.topInd = charts.topInd || echarts.init(document.getElementById('topIndicatorsChart'));
-  charts.botInd = charts.botInd || echarts.init(document.getElementById('bottomIndicatorsChart'));
-  charts.topP = charts.topP || echarts.init(document.getElementById('topPartnersChart'));
-  charts.topM = charts.topM || echarts.init(document.getElementById('topMechanismsChart'));
-
-  const indicators = [...new Set(records.map(r=>r.Indicator))].filter(Boolean);
-  const indAgg = indicators.map(ind=>{
-    const recs = records.filter(r=>r.Indicator === ind);
-    const total = recs.reduce((s,r)=>s + (r._computed ? r._computed.cum_total : 0),0);
-    const targ = recs.reduce((s,r)=>s + (N(r.Targets)||0),0);
-    const pct = targ ? (total / targ * 100) : 0;
-    return {ind, total, targ, pct};
-  });
-
-  const topIndicators = indAgg.filter(x=>x.targ>0).sort((a,b)=>b.pct - a.pct).slice(0,10);
-  const bottomIndicators = indAgg.filter(x=>x.targ>0 && x.total>0).sort((a,b)=>a.pct - b.pct).slice(0,10);
-
-  charts.topInd.setOption({
-    title:{ text:'Top Indicators (% Achievement)', left:'center' },
-    grid: baseGrid(),
-    tooltip:{ trigger:'axis' },
-    xAxis:{ type:'category', data: topIndicators.map(t=>t.ind), axisLabel:{rotate:45} },
-    yAxis:{ type:'value', name:'% Achievement', min:0, max: Math.max(...topIndicators.map(t=>t.pct),10) * 1.2 },
-    series:[ { type:'bar', data: topIndicators.map(t=>Math.round(t.pct)), itemStyle:{color:'#2e7d32'}, label:{show:true, formatter:'{c}%'} } ]
-  });
-
-  charts.botInd.setOption({
-    title:{ text:'Bottom Indicators (% Achievement) — excludes blank/zero targets & zero cum_total', left:'center' },
-    grid: baseGrid(),
-    tooltip:{ trigger:'axis' },
-    xAxis:{ type:'category', data: bottomIndicators.map(t=>t.ind), axisLabel:{rotate:45} },
-    yAxis:{ type:'value', name:'% Achievement', min:0, max: Math.max(...bottomIndicators.map(t=>t.pct),10) * 1.2 },
-    series:[ { type:'bar', data: bottomIndicators.map(t=>Math.round(t.pct)), itemStyle:{color:'#e53935'}, label:{show:true, formatter:'{c}%'} } ]
-  });
-
-  const partners = [...new Set(records.map(r=>r["Partner Name"]))].filter(Boolean);
-  const pAgg = partners.map(p=>{
-    const recs = records.filter(r=>r["Partner Name"]===p);
-    const total = recs.reduce((s,r)=>s + (r._computed ? r._computed.cum_total : 0),0);
-    const targ = recs.reduce((s,r)=>s + (N(r.Targets)||0),0);
-    const pct = targ ? (total / targ * 100) : 0;
-    return {p, total, targ, pct};
-  }).sort((a,b)=>b.pct - a.pct).slice(0,10);
-
-  charts.topP.setOption({
-    title:{ text:'Top Partners (% Achievement)', left:'center' },
-    grid: baseGrid(),
-    tooltip:{ trigger:'axis' },
-    xAxis:{ type:'category', data: pAgg.map(x=>x.p), axisLabel:{rotate:45} },
-    yAxis:{ type:'value', name:'% Achievement', min:0, max: Math.max(...pAgg.map(x=>x.pct),10) * 1.2 },
-    series:[ { type:'bar', data: pAgg.map(x=>Math.round(x.pct)), itemStyle:{color:'#1976d2'}, label:{show:true, formatter:'{c}%'} } ]
-  });
-
-  const mechs = [...new Set(records.map(r=>r["Mechanism Name"]))].filter(Boolean);
-  const mAgg = mechs.map(m=>{
-    const recs = records.filter(r=>r["Mechanism Name"]===m);
-    const total = recs.reduce((s,r)=>s + (r._computed ? r._computed.cum_total : 0),0);
-    const targ = recs.reduce((s,r)=>s + (N(r.Targets)||0),0);
-    const pct = targ ? (total / targ * 100) : 0;
-    return {m, total, targ, pct};
-  }).sort((a,b)=>b.pct - a.pct).slice(0,10);
-
-  charts.topM.setOption({
-    title:{ text:'Top Mechanisms (% Achievement)', left:'center' },
-    grid: baseGrid(),
-    tooltip:{ trigger:'axis' },
-    xAxis:{ type:'category', data: mAgg.map(x=>x.m), axisLabel:{rotate:45} },
-    yAxis:{ type:'value', name:'% Achievement', min:0, max: Math.max(...mAgg.map(x=>x.pct),10) * 1.2 },
-    series:[ { type:'bar', data: mAgg.map(x=>Math.round(x.pct)), itemStyle:{color:'#2e7d32'}, label:{show:true, formatter:'{c}%'} } ]
-  });
-}
-
-/* Refresh dashboard visuals */
-function refreshDashboard(){
-  if(!apiData) return;
+/* ---------- Master refresh ---------- */
+function refreshAll() {
+  if(!raw) return;
   const recs = getFilteredRecords();
-  recs.forEach(r=>{
-    if(!r._computed){
-      let cum = 0;
-      if(additiveIndicators.includes(r.Indicator)) cum = N(r["Quarter 1"]) + N(r["Quarter 2"]) + N(r["Quarter 3"]) + N(r["Quarter 4"]);
-      else if(nonAdditiveIndicators.includes(r.Indicator)) cum = N(r["Quarter 4"]) || N(r["Quarter 3"]) || N(r["Quarter 2"]) || N(r["Quarter 1"]) || 0;
-      else cum = N(r["Quarter 1"]) + N(r["Quarter 2"]) + N(r["Quarter 3"]) + N(r["Quarter 4"]);
-      r._computed = { cum_total: cum, percent: (r.Targets ? (cum / N(r.Targets) * 100) : 0) };
-    }
-  });
 
   // KPIs
-  const uniquePartners = new Set(recs.map(r=>r["Partner Name"]).filter(Boolean));
-  const uniqueMechs = new Set(recs.map(r=>r["Mechanism Name"]).filter(Boolean));
-  const totalTargets = recs.reduce((s,r)=>s + (N(r.Targets)||0),0);
-  const totalAch = recs.reduce((s,r)=>s + (r._computed ? r._computed.cum_total : 0),0);
+  const uniquePartners = new Set(recs.map(r=>r['Partner Name']).filter(Boolean));
+  const uniqueMechs = new Set(recs.map(r=>r['Mechanism Name']).filter(Boolean));
+  const totalTargets = recs.reduce((s,r)=> s + (r._computed? r._computed.targets : 0),0);
+  const totalAch = recs.reduce((s,r)=> s + (r._computed? r._computed.cum_total : 0),0);
   const overallPct = totalTargets ? (totalAch / totalTargets * 100) : 0;
-  document.getElementById('partnerCount').innerText = uniquePartners.size;
-  document.getElementById('mechCount').innerText = uniqueMechs.size;
+
+  $('#partnerCount').text(uniquePartners.size);
+  $('#mechCount').text(uniqueMechs.size);
+  $('#overallSummaryPct').text(`${Math.round(overallPct)}%`);
 
   // Render charts
-  renderFYChart(recs);
-  renderGauge(recs);
+  renderTargetsChart(recs);
   renderPartnerChart(recs);
   renderMechanismChart(recs);
-  renderQuarterly(recs);
-  renderTrends(recs);
-
-  setTimeout(()=>Object.values(charts).forEach(c=>c&&c.resize()), 160);
+  renderBottomIndicators(recs);
+  renderQuarterlyTrend(recs);
+  renderSmallTrends(recs);
+  renderQoC(recs);
 }
 
-/* Start */
-loadData();
+/* Kickoff */
+$(document).ready(()=> {
+  loadData();
+});
 </script>
 </body>
 </html>
+
