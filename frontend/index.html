@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mechanisms Dashboard - ECharts</title>
+  <!-- Bootstrap for layout -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <!-- ECharts -->
+  <script src="https://cdn.jsdelivr.net/npm/echarts/dist/echarts.min.js"></script>
+  <style>
+    body { padding: 20px; }
+    #chart { width: 100%; height: 500px; }
+  </style>
+</head>
+<body>
+
+  <h2>Mechanisms Dashboard - Quarterly Targets</h2>
+
+  <div class="mb-3">
+    <label for="mechanismSelect" class="form-label">Select Mechanism:</label>
+    <select id="mechanismSelect" class="form-select">
+      <option value="">-- All Mechanisms --</option>
+    </select>
+  </div>
+
+  <div id="chart"></div>
+
+  <script>
+    const chartDom = document.getElementById('chart');
+    const myChart = echarts.init(chartDom);
+    const mechanismSelect = document.getElementById("mechanismSelect");
+    let mechanismsData = [];
+
+    // Fetch data
+    async function fetchData() {
+      try {
+        const res = await fetch("http://127.0.0.1:8000/api/mechanisms");
+        mechanismsData = await res.json();
+        populateMechanismOptions();
+        renderChart(); // render chart for all mechanisms by default
+      } catch (err) {
+        console.error("Error fetching data:", err);
+        chartDom.innerHTML = "Error loading data";
+      }
+    }
+
+    // Populate mechanism dropdown
+    function populateMechanismOptions() {
+      const mechanisms = [...new Set(mechanismsData.map(d => d.mechanismName))].filter(Boolean);
+      mechanisms.forEach(name => {
+        const option = document.createElement("option");
+        option.value = name;
+        option.textContent = name;
+        mechanismSelect.appendChild(option);
+      });
+    }
+
+    // Prepare and render chart
+    function renderChart(selectedMechanism = "") {
+      let filteredData = selectedMechanism
+        ? mechanismsData.filter(d => d.mechanismName === selectedMechanism)
+        : mechanismsData;
+
+      // Aggregate quarterly targets by mechanism
+      const quarters = ["Quarter 1","Quarter 2","Quarter 3","Quarter 4"];
+      const xAxisLabels = filteredData.map(d => d.indicator ?? "Unknown");
+      const seriesData = quarters.map(q => 
+        filteredData.map(d => d[q] ?? 0)
+      );
+
+      const option = {
+        tooltip: { trigger: 'axis' },
+        legend: { data: quarters },
+        toolbox: { feature: { saveAsImage: {} } },
+        xAxis: { type: 'category', data: xAxisLabels, axisLabel: { rotate: 45 } },
+        yAxis: { type: 'value', name: 'Targets' },
+        series: quarters.map((q, i) => ({
+          name: q,
+          type: 'bar',
+          data: seriesData[i],
+        }))
+      };
+
+      myChart.setOption(option);
+    }
+
+    // Change mechanism filter
+    mechanismSelect.addEventListener("change", () => {
+      renderChart(mechanismSelect.value);
+    });
+
+    // Initial load
+    fetchData();
+  </script>
+
+</body>
+</html>
